@@ -15,6 +15,9 @@
 
 struct bgState *bg;
 
+/* Find out where error/success callbacks should be called
+  in this particular function
+*/
 void bgUpdate()
 {
   /* For updating interval */

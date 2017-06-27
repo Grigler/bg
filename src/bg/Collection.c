@@ -46,6 +46,8 @@ void bgCollectionUpload(char *cln)
   struct bgCollection* c = bgCollectionGet(cln);
   JSON_Value* v = NULL;
   size_t i = 0;
+  int responseCode = 0;
+
 
   /* Concatenating c_str onto ser - dangerous? */
   for(i = 0; i < vector_size(c->documents); i++)
@@ -65,9 +67,20 @@ void bgCollectionUpload(char *cln)
   {
     /* stuff */
   }
-  /* DEBUG */
-  printf("Portal status: %i\n", HttpResponseStatus(c->http));
-  printf("Portal content: %s\n", HttpResponseContent(c->http));
+  /* Handle response */
+  responseCode = HttpResponseStatus(c->http);
+  if(responseCode != 200)
+  {
+    if(bg->errorFunc != NULL)
+      bg->errorFunc(sstream_cstr(c->name), responseCode);
+  }
+  else
+  {
+    /* TODO - find what int count in successfFunc refers to */
+    if(bg->successFunc != NULL)
+      bg->successFunc(sstream_cstr(c->name), vector_size(c->documents));
+  }
+  
 
   /* Cleanup */
   sstream_delete(ser);
@@ -118,8 +131,12 @@ struct bgCollection *bgCollectionGet(char *cln)
   /* 
    * TODO - Change to comparing char* directly
    *  then fall back onto strcmp if failure
+   *  
+   *  Although, would this still work as name
+   *  is a sstream?
   */
   size_t i = 0;
+
   for(i = 0; i < vector_size(bg->collections); i++)
   {
     if(strcmp(cln, sstream_cstr(vector_at(bg->collections, i)->name)) == 0)
@@ -127,6 +144,6 @@ struct bgCollection *bgCollectionGet(char *cln)
       return vector_at(bg->collections, i);
     }
   }
-
+  
   return NULL;
 }
