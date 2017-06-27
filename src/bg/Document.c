@@ -1,5 +1,6 @@
 #ifndef AMALGAMATION
   #include "Document.h"
+  #include "State.h"
   #include "parson.h"
 
   #include <palloc/palloc.h>
@@ -68,6 +69,8 @@ void bgDocumentAddCStr(struct bgDocument *doc, char *path, char *val)
     }
   }
   vector_delete(out);
+
+  bg->updateFunc();
 }
 
 void bgDocumentAddInt(struct bgDocument *doc, char *path, int val)
@@ -108,6 +111,8 @@ void bgDocumentAddInt(struct bgDocument *doc, char *path, int val)
     }
   }
   vector_delete(out);
+
+  bg->updateFunc();
 }
 
 void bgDocumentAddDouble(struct bgDocument *doc, char *path, double val)
@@ -148,6 +153,8 @@ void bgDocumentAddDouble(struct bgDocument *doc, char *path, double val)
     }
   }
   vector_delete(out);
+
+  bg->updateFunc();
 }
 
 void bgDocumentAddBool(struct bgDocument *doc, char *path, int val)
@@ -188,4 +195,6 @@ void bgDocumentAddBool(struct bgDocument *doc, char *path, int val)
     }
   }
   vector_delete(out);
+
+  bg->updateFunc();
 }

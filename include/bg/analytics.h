@@ -31,7 +31,7 @@ struct bgDocument;
  *   path: /api/v1
  *
  ******************************************************************************/
-void bgAuth(char *url, char *path, char *guid, char *key);
+void bgAuth(char *guid, char *key);
 
 /******************************************************************************
  * bgInterval

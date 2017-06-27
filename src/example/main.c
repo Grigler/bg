@@ -52,11 +52,13 @@ void http_test()
 
 int main(int argc, char *argv[])
 {
+  int t = 0;
+
   struct bgDocument *doc;
   doc = bgDocumentCreate();
 
   http_test();
-  bgAuth(NULL, NULL, "", "");
+  bgAuth("", "");
 
   bgErrorFunc(on_error);
   bgSuccessFunc(on_success);
@@ -83,7 +85,6 @@ int main(int argc, char *argv[])
 
   bgCollectionAdd("Test", doc);
 
-  /* Tempory upload function, simply serializes and dumps to console */
   bgCollectionUpload("Test");
 
   bgCleanup();

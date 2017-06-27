@@ -8,11 +8,14 @@
 
 struct bgDocument;
 struct StringStream;
+struct Http;
 
 struct bgCollection
 {
   struct sstream *name;
   vector(struct bgDocument *) *documents;
+  
+  struct Http *http;
 };
 
 void bgCollectionDestroy(struct bgCollection *cln);
