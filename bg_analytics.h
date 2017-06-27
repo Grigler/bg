@@ -128,6 +128,8 @@ void bgCleanup();
 
 #endif
 
+#define BG_URL "http://bg-games.com"
+#define BG_PATH "/api/v1"
 #ifndef PALLOC_H
 #define PALLOC_H
 

@@ -1282,6 +1282,7 @@ char *HttpResponseContent(struct Http *ctx)
   #include "Collection.h"
   #include "Document.h"
   #include "State.h"
+  #include "http/http.h"
 
   #include "palloc/palloc.h"
 #endif
@@ -1314,9 +1315,7 @@ void bgCollectionAdd(char *cln, struct bgDocument *doc)
 
 void bgCollectionUpload(char *cln)
 {
-  /* New thread is launched to carry out this process 
-  DEBUG Placeholder to serialise and print instead
-  */
+  //Serializing documents to c_str
   char* ser = NULL;
   struct bgCollection* c = bgCollectionGet(cln);
   JSON_Value* v = vector_at(c->documents, 0)->rootVal;
@@ -1324,11 +1323,22 @@ void bgCollectionUpload(char *cln)
   ser = json_serialize_to_string_pretty(v);
 
   // LEAK: ser must be free'd when no longer in use.
-
+  /*
   if(ser != NULL)
     puts(ser);
   else
-    puts("shit");
+    puts("\n! Serialization error\n");
+  */
+
+  //Send to server here
+  struct Http *http = NULL;
+  http = HttpCreate();
+
+  
+
+
+  //Cleanup
+  pfree(ser);
 
 
   for(i = 0; i < vector_size(c->documents); i++)
@@ -1340,12 +1350,8 @@ void bgCollectionUpload(char *cln)
     }
   }
 
-  vector_delete(c->documents);
-
-  // NOTE: Instead of deleting the vector each time, just use vector_clear
-  // to reuse and only delete it when the collection is destroyed.
-
-  c->documents = NULL;
+  //Clearing for later use
+  vector_clear(c->documents);
 }
 
 void bgCollectionSaveAndDestroy(struct bgCollection *cln)
@@ -3594,6 +3600,7 @@ void json_set_allocation_functions(JSON_Malloc_Function malloc_fun, JSON_Free_Fu
 }
 
 #ifndef AMALGAMATION
+  #include "config.h"
   #include "State.h"
   #include "Collection.h"
   #include "parson.h"
@@ -3603,7 +3610,7 @@ void json_set_allocation_functions(JSON_Malloc_Function malloc_fun, JSON_Free_Fu
 
 struct bgState *bg;
 
-void bgAuth(char *url, char *path, char *guid, char *key)
+void bgAuth(char *guid, char *key)
 {
   /*
 ANN_NEW(bg,
