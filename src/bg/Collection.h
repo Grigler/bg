@@ -14,7 +14,8 @@ struct bgCollection
 {
   struct sstream *name;
   vector(struct bgDocument *) *documents;
-  
+  int lastDocumentCount;
+
   struct Http *http;
 };
 

@@ -25,7 +25,6 @@ struct bgState
   vector(struct bgCollection *) *collections;
   void (*errorFunc)(char *cln, int code);
   void (*successFunc)(char *cln, int count);
-  void (*updateFunc)(void);
 };
 
 extern struct bgState *bg;

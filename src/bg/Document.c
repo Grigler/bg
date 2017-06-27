@@ -7,7 +7,7 @@
   #include <palloc/sstream.h>
 #endif
 
-//#include <stdlib.h>
+void bgUpdate();
 
 struct bgDocument *bgDocumentCreate()
 {
@@ -17,7 +17,7 @@ struct bgDocument *bgDocumentCreate()
 
   rtn->rootVal = json_value_init_object();
   rtn->rootObj = json_value_get_object(rtn->rootVal);
-  rtn->rootArr = json_value_get_array(rtn->rootVal);
+  //rtn->rootArr = json_value_get_array(rtn->rootVal);
 
   return rtn;
 }
@@ -28,7 +28,7 @@ void bgDocumentDestroy(struct bgDocument *doc)
   json_value_free(doc->rootVal);
 
   // LEAK:
-  // pfree(doc)?
+  pfree(doc);
 }
 
 void bgDocumentAddCStr(struct bgDocument *doc, char *path, char *val)
@@ -70,7 +70,7 @@ void bgDocumentAddCStr(struct bgDocument *doc, char *path, char *val)
   }
   vector_delete(out);
 
-  bg->updateFunc();
+  bgUpdate();
 }
 
 void bgDocumentAddInt(struct bgDocument *doc, char *path, int val)
@@ -112,7 +112,7 @@ void bgDocumentAddInt(struct bgDocument *doc, char *path, int val)
   }
   vector_delete(out);
 
-  bg->updateFunc();
+  bgUpdate();
 }
 
 void bgDocumentAddDouble(struct bgDocument *doc, char *path, double val)
@@ -154,7 +154,7 @@ void bgDocumentAddDouble(struct bgDocument *doc, char *path, double val)
   }
   vector_delete(out);
 
-  bg->updateFunc();
+  bgUpdate();
 }
 
 void bgDocumentAddBool(struct bgDocument *doc, char *path, int val)
@@ -196,5 +196,5 @@ void bgDocumentAddBool(struct bgDocument *doc, char *path, int val)
   }
   vector_delete(out);
 
-  bg->updateFunc();
+  bgUpdate();
 }

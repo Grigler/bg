@@ -10,6 +10,8 @@
 #include <stdio.h>
 #include <string.h>
 
+void bgUpdate();
+
 void bgCollectionCreate(char *cln)
 {
   struct bgCollection* newCln;
@@ -20,13 +22,14 @@ void bgCollectionCreate(char *cln)
 
   newCln->documents = vector_new(struct bgDocument*);
   vector_push_back(bg->collections, newCln);
-  
+  newCln->lastDocumentCount = 0;
+
   newCln->http = HttpCreate();
   HttpAddCustomHeader(newCln->http, "AuthAccessKey", bg->guid);
   HttpAddCustomHeader(newCln->http, "AuthAccessSecret", bg->key);
   HttpAddCustomHeader(newCln->http, "Content-Type", "application/json;charset=utf-8");
 
-  bg->updateFunc();
+  bgUpdate();
 }
 
 void bgCollectionAdd(char *cln, struct bgDocument *doc)
@@ -36,18 +39,20 @@ void bgCollectionAdd(char *cln, struct bgDocument *doc)
   /* Again, could be more complex */
   doc = NULL;
 
-  bg->updateFunc();
+  bgUpdate();
 }
 
 void bgCollectionUpload(char *cln)
 {
   /* For Serializing data */
-  sstream* ser = sstream_new();
+  sstream *ser = sstream_new();
+  sstream *url = sstream_new();
   struct bgCollection* c = bgCollectionGet(cln);
   JSON_Value* v = NULL;
   size_t i = 0;
   int responseCode = 0;
 
+  sstream_push_cstr(ser, "{\"documents\":[");
 
   /* Concatenating c_str onto ser - dangerous? */
   for(i = 0; i < vector_size(c->documents); i++)
@@ -55,17 +60,21 @@ void bgCollectionUpload(char *cln)
     if(vector_at(c->documents, i))
     {
       v = vector_at(c->documents,i)->rootVal;
-      //strcat(ser, json_serialize_to_string_pretty(v));
-      sstream_push_cstr(ser, json_serialize_to_string_pretty(v));
+      sstream_push_cstr(ser, json_serialize_to_string(v));
     }
-  }  
+  } 
+
+  sstream_push_cstr(ser, "]}");
 
   /* Sending request to server */
-  HttpRequest(c->http, sstream_cstr(bg->fullUrl), sstream_cstr(ser));
+  sstream_push_cstr(url, sstream_cstr(bg->fullUrl));
+  sstream_push_cstr(url, sstream_cstr(c->name));
+  sstream_push_cstr(url, "/documents");
+  HttpRequest(c->http, sstream_cstr(url), sstream_cstr(ser));
   /* blocking while request pushes through */
   while(!HttpRequestComplete(c->http))
   {
-    /* stuff */
+    /* blocking stuff */
   }
   /* Handle response */
   responseCode = HttpResponseStatus(c->http);
@@ -76,22 +85,18 @@ void bgCollectionUpload(char *cln)
   }
   else
   {
-    /* TODO - find what int count in successfFunc refers to */
     if(bg->successFunc != NULL)
       bg->successFunc(sstream_cstr(c->name), vector_size(c->documents));
+
   }
   
-
   /* Cleanup */
   sstream_delete(ser);
+  sstream_delete(url);
 
   for(i = 0; i < vector_size(c->documents); i++)
   {
-    // NOTE: Should this need a NULL check?
-    if(vector_at(c->documents, i))
-    {
-      bgDocumentDestroy(vector_at(c->documents, i));
-    }
+    bgDocumentDestroy(vector_at(c->documents, i));
   }
 
   /* Clearing vector for later use */
@@ -107,24 +112,21 @@ void bgCollectionDestroy(struct bgCollection *cln)
   {
     for(i = 0; i < vector_size(cln->documents); i++)
     {
-      if(vector_at(cln->documents, i))
-      {
-        bgDocumentDestroy(vector_at(cln->documents, i));
-      }
+      bgDocumentDestroy(vector_at(cln->documents, i));
     }
     vector_delete(cln->documents);
   }
 
   sstream_delete(cln->name);
+  HttpDestroy(cln->http);
 
   pfree(cln);
 
   cln = NULL;
 }
 
-/*
-  Helper function to get the collection from the state by name 
-  returns NULL if no collection by cln exists
+/*  Helper function to get the collection from the state by name 
+ *  returns NULL if no collection by cln exists
 */
 struct bgCollection *bgCollectionGet(char *cln)
 {
