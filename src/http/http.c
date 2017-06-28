@@ -282,6 +282,7 @@ void _HttpPollConnect(struct Http *ctx)
   }
 
   sstream_push_cstr(content, sstream_cstr(ctx->path));
+  /*TODO*/
   sstream_push_char(content, '?');
   sstream_push_cstr(content, sstream_cstr(ctx->query));
   sstream_push_cstr(content, " HTTP/1.0\r\n");

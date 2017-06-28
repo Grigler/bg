@@ -103,6 +103,7 @@ void bgCollectionAdd(char *cln, struct bgDocument *doc);
  *
  ******************************************************************************/
 void bgCollectionUpload(char *cln);
+/*void bgCollectionsUpload();*/
 
 /******************************************************************************
  * bg*Func
